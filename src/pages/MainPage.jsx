@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Linkedin, Github, Mail, Phone, User, GraduationCap, Code, Briefcase, Award, Book, MapPin, ChevronUp, Palette, Layout, Server, Smartphone, Zap, CheckCircle, Download, Menu, X, ExternalLink } from 'lucide-react';
-import picture from '../../public/me.jpeg';
+import picture from '../assets/me.jpeg';
 import AnimatedSection from '../components/AnimatedSection';
 import SectionTitle from '../components/SectionTitle';
 import ServiceCard from '../components/ServiceCard';
@@ -386,7 +386,7 @@ const MainPage = () => {
             className="relative inline-block mb-6"
           >
             <img 
-              src="/me.jpeg" 
+              src={picture}
               alt="Namra Imtiaz" 
               className="mx-auto rounded-full w-48 h-48 object-cover border-4 border-cyan-500"
             />
