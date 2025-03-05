@@ -386,7 +386,7 @@ const MainPage = () => {
             className="relative inline-block mb-6"
           >
             <img 
-              src="../../public/me.jpeg" 
+              src="/me.jpeg" 
               alt="Namra Imtiaz" 
               className="mx-auto rounded-full w-48 h-48 object-cover border-4 border-cyan-500"
             />
