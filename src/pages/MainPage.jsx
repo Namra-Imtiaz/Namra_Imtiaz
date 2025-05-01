@@ -78,7 +78,7 @@ const MainPage = () => {
 
   const experienceData = [
     {
-      title: 'Full Stack Development Remote Intern',
+      title: 'Full Stack Development - Remote Intern',
       company: 'DevelopersHub Corporation',
       duration: '03/2025 - 04/2025',
       description: 'Worked on MERN stack-based development tasks, contributing to real-world projects and enhancing full stack skills through practical experience.'
