@@ -99,6 +99,12 @@ const MainPage = () => {
 
   const projectsData = [
     {
+      name: 'Mental Wellness App (in progress)',
+      description: 'Developing a mental wellness app using Flutter, featuring user authentication, a Monte Carlo decision-based support system, and an AI-powered chatbot. Includes personalized profiles, mood-based music therapy, and guided meditation for a complete self-care experience.',
+      technologies: ['flutter', 'AI', 'firebase'],
+      github: 'https://github.com/Namra-Imtiaz/mental_wellness_app'
+    },
+    {
       name: 'SellSphere (in progress)',
       description: 'Developing a scalable e-commerce platform that enables businesses to manage vendors, products, and customers efficiently. Built with Next.js 14, Prisma, and MongoDB, it offers a seamless and feature-rich online marketplace experience.',
       technologies: ['Next.js 14', 'Prisma', 'MongoDB', 'Tailwind CSS'],
@@ -449,7 +455,7 @@ const MainPage = () => {
           </motion.div>
           
           <motion.a 
-            href="/Namra Imtiaz-Resume.pdf" 
+            href="/Namra Imtiaz_Resume.pdf" 
             download 
             className="inline-flex items-center bg-cyan-500 text-black px-6 py-3 rounded-full hover:bg-cyan-600 transition-colors"
             initial={{ y: 20, opacity: 0 }}
