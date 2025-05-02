@@ -51,7 +51,7 @@ const MainPage = () => {
 
   const personalInfo = {
     name: 'Namra Imtiaz',
-    title: 'MERN Stack Developer & UI/UX Designer',
+    title: 'Developer & UI/UX Designer',
     email: 'namraimtiaz04@gmail.com',
     phone: '(+92)3131368638',
     linkedin: 'https://www.linkedin.com/in/namra-imtiaz',
@@ -461,7 +461,7 @@ const MainPage = () => {
           </motion.div>
           
           <motion.a 
-            href="/Namra Imtiaz_Resume.pdf" 
+            href="/Resume_Namra Imtiaz.pdf" 
             download 
             className="inline-flex items-center bg-cyan-500 text-black px-6 py-3 rounded-full hover:bg-cyan-600 transition-colors"
             initial={{ y: 20, opacity: 0 }}

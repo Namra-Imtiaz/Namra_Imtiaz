@@ -71,7 +71,7 @@ const SplashPage = () => {
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 30 }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <p className="text-xl md:text-2xl text-gray-300 mb-8">MERN Stack Developer & UI/UX Designer</p>
+          <p className="text-xl md:text-2xl text-gray-300 mb-8">Developer & UI/UX Designer</p>
         </motion.div>
 
         <motion.div
