@@ -461,7 +461,7 @@ const MainPage = () => {
           </motion.div>
           
           <motion.a 
-            href="/Resume_Namra Imtiaz.pdf" 
+            href="/Namra Imtiaz Resume.pdf" 
             download 
             className="inline-flex items-center bg-cyan-500 text-black px-6 py-3 rounded-full hover:bg-cyan-600 transition-colors"
             initial={{ y: 20, opacity: 0 }}
