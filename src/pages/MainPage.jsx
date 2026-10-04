@@ -1,662 +1,227 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Linkedin, Github, Mail, Phone, User, GraduationCap, Code, Briefcase, Award, Book, MapPin, ChevronUp, Palette, Layout, Server, Smartphone, Zap, CheckCircle, Download, Menu, X, ExternalLink } from 'lucide-react';
+import {
+  Linkedin, Github, Mail, Phone, User, GraduationCap, Code, Briefcase, Award, MapPin,
+  ChevronUp, Menu, X, ExternalLink, FlaskConical, Users, Globe, FileText, BookOpen, Database,
+} from 'lucide-react';
 import picture from '../assets/me.jpeg';
 import AnimatedSection from '../components/AnimatedSection';
 import SectionTitle from '../components/SectionTitle';
-import ServiceCard from '../components/ServiceCard';
+import CopyButton from '../components/CopyButton';
+import RichText from '../components/RichText';
+import {
+  personalInfo, stats, experienceData, educationData, projectsData, researchData,
+  skillsData, leadershipData, certificationsData, hackathonsData,
+} from '../data/portfolio';
+
+const NAV = ['home', 'about', 'experience', 'projects', 'research', 'skills', 'education', 'contact'];
+
+const FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'ai', label: 'AI / IoT' },
+  { id: 'web', label: 'Web' },
+  { id: 'mobile', label: 'Mobile' },
+];
+
+const LINK_ICONS = { github: Github, live: Globe, notebook: BookOpen, drive: Database, doc: FileText };
+
+const socials = [
+  { icon: Linkedin, url: personalInfo.linkedin, label: 'LinkedIn Profile' },
+  { icon: Github, url: personalInfo.github, label: 'GitHub Profile' },
+];
+
+const card = 'bg-bg rounded-xl border border-line hover:shadow-md transition duration-200';
+const chip = 'bg-accent-soft text-muted border border-line px-3 py-1 rounded-md text-xs font-medium';
 
 const MainPage = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [filter, setFilter] = useState('all');
   const { scrollYProgress } = useScroll();
-  const headerRef = useRef(null);
-
-  // Progress bar at the top of the page
   const progressBarWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const onScroll = () => {
       setShowScrollTop(window.scrollY > 500);
-      
-      // Update active section based on scroll position
-      const sections = document.querySelectorAll('section[id]');
-      sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        if (window.scrollY >= sectionTop - 100 && window.scrollY < sectionTop + sectionHeight - 100) {
-          setActiveSection(section.getAttribute('id'));
+      const probe = window.scrollY + 120;
+      for (const id of NAV) {
+        const el = document.getElementById(id);
+        if (el && probe >= el.offsetTop && probe < el.offsetTop + el.offsetHeight) {
+          setActiveSection(id);
+          break;
         }
-      });
+      }
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
-  const scrollToSection = (sectionId) => {
-    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
-    setActiveSection(sectionId);
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     setMobileMenuOpen(false);
   };
 
-  const personalInfo = {
-    name: 'Namra Imtiaz',
-    title: 'Developer & UI/UX Designer',
-    email: 'namraimtiaz04@gmail.com',
-    phone: '(+92)3131368638',
-    linkedin: 'https://www.linkedin.com/in/namra-imtiaz',
-    github: 'https://github.com/Namra-Imtiaz',
-    location: 'Karachi, Pakistan',
-    summary: 'Passionate Frontend Developer with skills in HTML, CSS, JavaScript, and React. Experienced in UI/UX design, creating smooth and user-friendly interfaces. Currently expanding my skills in the MERN stack by building projects and learning Flutter for mobile app development. Always eager to learn, solve problems, and create useful solutions.'
-  };
+  const visibleProjects = projectsData.filter((p) => filter === 'all' || p.category === filter);
 
-  const educationData = [
-    {
-      degree: 'Bachelor in Software Engineering',
-      institution: 'NED University of Engineering & Technology',
-      duration: '10/2022 - Present',
-      location: 'Karachi, Pakistan',
-      description: 'Currently in my third year, sixth semester of a comprehensive software engineering program, gaining expertise in software development and problem-solving.'},
-    {
-      degree: 'Pre-Engineering',
-      institution: 'Cantt College',
-      duration: '01/2020 - 01/2022',
-      location: 'Karachi, Pakistan',
-      description: 'Completed pre-engineering studies with a focus on mathematics and physics.'
-    }
-  ];
-
-  const experienceData = [
-    {
-      title: 'Full Stack Development - Remote Intern',
-      company: 'DevelopersHub Corporation',
-      duration: '03/2025 - 04/2025',
-      description: 'Worked on MERN stack-based development tasks, contributing to real-world projects and enhancing full stack skills through practical experience.'
-    },
-    {
-      title: 'IT Director',
-      company: 'IEEE PES NEDUET Society',
-      duration: '10/2024 - Present',
-      description: 'Guided members in frontend development and organized UI/UX workshops.'
-    },
-    {
-      title: 'IT Member',
-      company: 'NSA NEDUET SOCIETY',
-      duration: '12/2024 - Present',
-      description: 'Working on NSA\'s portal under the IT heads.'
-    },
-    {
-      title: 'C++ Intern',
-      company: 'CodSoft',
-      duration: '10/2023 - 11/2023',
-      description: 'Developed various C++ applications, strengthening problem-solving and programming abilities.'
-    }
-  ];
-
-  const projectsData = [
-    {
-      name: 'Mental Wellness App (in progress)',
-      description: 'Developing a mental wellness app using Flutter, featuring user authentication, a Monte Carlo decision-based support system, and an AI-powered chatbot. Includes personalized profiles, mood-based music therapy, and guided meditation for a complete self-care experience.',
-      technologies: ['flutter', 'AI', 'firebase'],
-      github: 'https://github.com/Namra-Imtiaz/mental_wellness_app'
-    },
-    {
-      name: 'SellSphere (in progress)',
-      description: 'Developing a scalable e-commerce platform that enables businesses to manage vendors, products, and customers efficiently. Built with Next.js 14, Prisma, and MongoDB, it offers a seamless and feature-rich online marketplace experience.',
-      technologies: ['Next.js 14', 'Prisma', 'MongoDB', 'Tailwind CSS'],
-      github: '#'
-    },
-    {
-      name: 'ArtisianHub (MERN)',
-      description: 'Developed an online marketplace for local artisans with user-friendly profiles, product management, shopping cart functionality, and secure checkout, showcasing full-stack web development skills. The project included a comprehensive SRS, design document, code quality evaluation using SonarQube, and detailed manual testing for functionality and reliability.',
-      technologies: ['React', 'Node.js', 'Express', 'MongoDB'],
-      github: 'https://github.com/Namra-Imtiaz/artisian-hub',
-      documents: [
-        { name: "Design Document", path: "/documents/DETAILED DESIGN DOCUMENT.pdf" },
-        { name: "Code Quality check", path: "/documents/CQcheck_064645.pdf" },
-        { name: "Manual Test", path: "/documents/testing.pdf" },
-        { name: "SRS", path: "/documents/SRS.pdf" }
-      ],
-    },
-    {
-      name: 'Post Submission System',
-      description: 'Built and deployed a post submission system using React and Appwrite, hosted on Vercel. Implemented document creation, update, and file upload features.',
-      technologies: ['React', 'Appwrite', 'Vercel'],
-      github: 'https://github.com/Namra-Imtiaz/appwriteblog'
-    },
-    {
-      name: 'TutorLinknet',
-      description: 'Developed an online tutoring platform with user-friendly profiles and registration.',
-      technologies: ['HTML', 'CSS', 'JavaScript', 'PHP'],
-      github: '#'
-    },
-    {
-      name: 'Portfolio and To-Do List',
-      description: 'Created a personal portfolio and a to-do list application using React, showcasing skills in component design and state management.',
-      technologies: ['React', 'CSS'],
-      github: 'https://github.com/Namra-Imtiaz/react_projects/tree/main/10_todocontextlocal'
-    },
-    {
-      name: 'Craftique (Figma)',
-      description: 'Designed a craft-focused e-commerce mobile application with an engaging and user-friendly UI/UX.',
-      technologies: ['Figma', 'UI/UX Design'],
-      github: 'https://www.figma.com/design/jp3CWVBQ5p0mRaE3WTQmgU/HCI-2?node-id=0-1&t=L8LHsLOmupPC0Ssg-1'
-    }
-  ];
-
-  const skillsData = {
-    technical: [
-      'HTML', 'CSS', 'JavaScript', 'React', 
-      'SQL', 'Python', 'C++', 'Figma','Node.js',
-      'Adobe Illustrator'
-    ],
-    interpersonal: [
-      'Teamwork', 'Ability to work under pressure', 
-      'Creativity', 'Time Management','Negotiation'
-    ]
-  };
-
-  const servicesData = [
-    {
-      icon: <Layout size={24} />,
-      title: 'Frontend Development',
-      description: 'Building modern and interactive user interfaces using React and other frontend technologies.'
-    },
-    {
-      icon: <Code size={24} />,
-      title: 'MERN Basic Development',
-      description: 'Learning and developing web applications using the MERN stack.'
-    },
-    {
-      icon: <Palette size={24} />,
-      title: 'UI/UX Design',
-      description: 'Creating user-friendly and visually appealing designs focused on enhancing user experience.'
-    },
-    {
-      icon: <Code size={24} />,
-      title: 'Software Requirement Specification (SRS)',
-      description: 'Documenting detailed software requirements to ensure clear development guidelines and project success.'
-    }
-];
-
-
-
-
-  const certificationsData = [
-    {
-      title: 'AI and Data Science Bootcamp',
-      organization: 'AI Club KI BHAITAK III by AI Club Society',
-      duration: '03/2024 - 05/2024',
-      description: 'Completed a three-month bootcamp, gaining a basic understanding of AI and Data Science concepts.'
-    },
-    {
-        title: 'Adobe Illustrator',
-        organization: 'Next Dimension',
-        duration: '03/2023 - 04/2024',
-        description: 'Completed a one-month course on Adobe Illustrator, learning essential design principles, vector graphics, and creative techniques for digital illustrations.'
-      },
-      {
-        title: 'Frontend Hackathon',
-        organization: 'Society for Promotions and Science,Engineering and Technology Society',
-        duration: '6/2024',
-        description: 'Participated in frontend Hackathon organized by SENTEC Society.'
-      },
-  ];
-
-
-
-//   const achievementsData = [
-//     {
-//       title: 'IT Director at IEEE PES NEDUET Society',
-//       description: 'Led the IT team and organized successful workshops on frontend development and UI/UX design.'
-//     },
-//     {
-//       title: 'Completed Multiple Client Projects',
-//       description: 'Successfully delivered web applications and design projects to clients with positive feedback.'
-//     }
-//   ];
-
-  // Animation variants
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.6 }
-    }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+  const navLinks = (extra = '') =>
+    NAV.map((id) => (
+      <a
+        key={id}
+        href={`#${id}`}
+        onClick={(e) => { e.preventDefault(); scrollToSection(id); }}
+        className={`${activeSection === id ? 'text-accent' : 'text-muted'} hover:underline transition-colors capitalize ${extra}`}
+      >
+        {id}
+      </a>
+    ));
 
   return (
-    <div className="bg-black text-white min-h-screen font-sans">
-      {/* Progress bar */}
-      <motion.div 
-        className="fixed top-0 left-0 right-0 h-1 bg-cyan-500 z-50"
-        style={{ width: progressBarWidth, transformOrigin: "0%" }}
-      />
+    <div className="bg-bg text-ink min-h-screen font-sans">
+      <motion.div className="fixed top-0 left-0 h-0.5 bg-accent z-50" style={{ width: progressBarWidth }} />
 
       {/* Navigation */}
-      <nav ref={headerRef} className="fixed top-0 left-0 right-0 z-40 bg-gray-900/90 backdrop-blur-sm shadow-lg border-b border-gray-800">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-bg/90 backdrop-blur border-b border-line">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Link to="/">
-              <motion.span 
-                className="text-2xl font-bold text-cyan-400 cursor-pointer"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                N.I
-              </motion.span>
-            </Link>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-6">
-            {['home', 'about', 'services', 'education', 'experience', 'projects', 'skills', 'contact'].map((section) => (
-              <motion.a 
-                key={section} 
-                href={`#${section}`} 
-                className={`${activeSection === section ? 'text-cyan-400' : 'text-gray-300'} hover:text-cyan-400 transition-colors capitalize relative`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(section);
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {section}
-                {activeSection === section && (
-                  <motion.span 
-                    className="absolute -bottom-1 left-0 w-full h-0.5 bg-cyan-400"
-                    layoutId="activeSection"
-                  />
-                )}
-              </motion.a>
-            ))}
-          </div>
-          
-          {/* Mobile menu button */}
-          <motion.button 
-            className="md:hidden text-gray-300 focus:outline-none"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            whileTap={{ scale: 0.95 }}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          <Link to="/" className="text-2xl font-bold text-ink">N.I</Link>
+          <div className="hidden md:flex space-x-6 text-sm">{navLinks()}</div>
+          <button
+            className="md:hidden text-muted"
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </motion.button>
+          </button>
         </div>
-        
-        {/* Mobile Navigation Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div 
-              className="md:hidden bg-gray-900 border-b border-gray-800"
+            <motion.div
+              className="md:hidden bg-bg border-b border-line overflow-hidden"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
             >
-              <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-                {['home', 'about', 'services', 'education', 'experience', 'projects', 'skills', 'contact'].map((section) => (
-                  <motion.a 
-                    key={section} 
-                    href={`#${section}`} 
-                    className={`${activeSection === section ? 'text-cyan-400' : 'text-gray-300'} hover:text-cyan-400 transition-colors capitalize py-2`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      scrollToSection(section);
-                    }}
-                    whileHover={{ x: 5 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {section}
-                  </motion.a>
-                ))}
-              </div>
+              <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">{navLinks('py-1')}</div>
             </motion.div>
           )}
         </AnimatePresence>
       </nav>
 
-      {/* Scroll to top button */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            onClick={scrollToTop}
-            className="fixed bottom-8 right-8 bg-cyan-500 text-black p-3 rounded-full shadow-lg z-50 hover:bg-cyan-600 transition-colors"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="fixed bottom-8 right-8 bg-accent text-on-accent p-3 rounded-full shadow-lg z-50 hover:opacity-90 transition-colors"
             aria-label="Scroll to top"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
           >
             <ChevronUp size={24} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Home Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center pt-16 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
-        {/* Background animated elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full bg-cyan-500/10"
-              initial={{ 
-                x: Math.random() * window.innerWidth, 
-                y: Math.random() * window.innerHeight,
-                width: Math.random() * 100 + 50,
-                height: Math.random() * 100 + 50,
-                opacity: 0 
-              }}
-              animate={{ 
-                x: [
-                  Math.random() * window.innerWidth, 
-                  Math.random() * window.innerWidth
-                ],
-                y: [
-                  Math.random() * window.innerHeight, 
-                  Math.random() * window.innerHeight
-                ],
-                opacity: [0, 0.3, 0]
-              }}
-              transition={{ 
-                duration: Math.random() * 10 + 10, 
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
-          ))}
-        </div>
-        
-        <AnimatedSection className="text-center px-4 z-10">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, type: "spring" }}
-            className="relative inline-block mb-6"
-          >
-            <img 
-              src={picture}
-              alt="Namra Imtiaz" 
-              className="mx-auto rounded-full w-48 h-48 object-cover border-4 border-cyan-500"
-            />
-            <motion.div 
-              className="absolute inset-0 rounded-full border-4 border-cyan-400/50"
-              animate={{ 
-                scale: [1, 1.05, 1],
-                opacity: [0.5, 0.8, 0.5]
-              }}
-              transition={{ 
-                duration: 3,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
-          </motion.div>
-          
-          <motion.h1 
-            className="text-4xl md:text-5xl font-bold mb-4"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <span className="text-cyan-400">Namra</span> Imtiaz
-          </motion.h1>
-          
-          <motion.p 
-            className="text-xl md:text-2xl text-gray-300 mb-6"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            {personalInfo.title}
-          </motion.p>
-          
-          <motion.div 
-            className="flex justify-center space-x-4 mb-6"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            {[
-              { icon: <Linkedin size={32} />, url: personalInfo.linkedin, label: "LinkedIn Profile" },
-              { icon: <Github size={32} />, url: personalInfo.github, label: "GitHub Profile" },
-              { icon: <Mail size={32} />, url: `mailto:${personalInfo.email}`, label: "Email Contact" }
-            ].map((social, index) => (
-              <motion.a 
-                key={index}
-                href={social.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors"
-                aria-label={social.label}
-                whileHover={{ y: -5, scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {social.icon}
-              </motion.a>
+      {/* Home */}
+      <section id="home" className="min-h-[90vh] flex items-center justify-center pt-16 bg-bg relative">
+        <AnimatedSection className="text-center px-4 z-10 max-w-3xl">
+          <div className="relative inline-block mb-6">
+            <img src={picture} alt="Namra Imtiaz" className="mx-auto rounded-full w-44 h-44 object-cover ring-4 ring-accent-soft" />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-3 tracking-tight">
+            Namra Imtiaz
+          </h1>
+          <p className="text-xl md:text-2xl text-muted font-medium mb-3">{personalInfo.title}</p>
+          <p className="text-muted mb-8"><RichText text={personalInfo.tagline} /></p>
+
+          <div className="flex justify-center items-center gap-5 mb-8 flex-wrap">
+            {socials.map(({ icon: Icon, url, label }) => (
+              <a key={label} href={url} {...(url.startsWith("mailto:") ? {} : { target: "_blank", rel: "noopener noreferrer" })} aria-label={label}
+                className="text-ink hover:text-muted transition">
+                <Icon size={30} />
+              </a>
             ))}
-          </motion.div>
-          
-          <motion.a 
-            href="/Namra Imtiaz Resume.pdf" 
-            download 
-            className="inline-flex items-center bg-cyan-500 text-black px-6 py-3 rounded-full hover:bg-cyan-600 transition-colors"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(6, 182, 212, 0.5)" }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Download className="mr-2" /> Download CV
-          </motion.a>
-          
-          <motion.div
-            className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-          >
-            <motion.div
-              className="w-6 h-10 border-2 border-cyan-400 rounded-full flex justify-center"
-              animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              <motion.div
-                className="w-1 h-2 bg-cyan-400 rounded-full mt-2"
-                animate={{ opacity: [0, 1, 0], y: [0, 4, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              />
-            </motion.div>
-            <p className="text-xs text-cyan-400 mt-2">Scroll Down</p>
-          </motion.div>
+          </div>
+
+          <div className="flex justify-center gap-4 flex-wrap">
+            <a href="#projects" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}
+              className="inline-flex items-center border border-line text-ink px-6 py-3 rounded-lg font-semibold hover:bg-accent-soft transition-colors">
+              View Projects
+            </a>
+          </div>
         </AnimatedSection>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 bg-gray-900 relative">
+      {/* About */}
+      <section id="about" className="py-20 bg-surface border-y border-line">
         <div className="container mx-auto px-4">
           <AnimatedSection>
-            <SectionTitle title="About Me" icon={<User size={24} />} />
-            <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-700 hover:border-cyan-500 transition-all duration-500 shadow-xl">
-              <motion.p 
-                className="text-lg text-gray-300 mb-6 leading-relaxed"
-                variants={fadeInUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
-                {personalInfo.summary}
-              </motion.p>
-              
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                variants={staggerContainer}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
+            <SectionTitle title="About Me" eyebrow="About" />
+            <div className="grid lg:grid-cols-5 gap-12">
+              <p className="lg:col-span-3 text-lg text-muted leading-8"><RichText text={personalInfo.summary} /></p>
+              <ul className="lg:col-span-2 space-y-5">
                 {[
-                  { icon: <Mail className="text-cyan-400" size={20} />, label: "Email", value: personalInfo.email, href: `mailto:${personalInfo.email}` },
-                  { icon: <Phone className="text-cyan-400" size={20} />, label: "Phone", value: personalInfo.phone, href: `tel:${personalInfo.phone}` },
-                  { icon: <MapPin className="text-cyan-400" size={20} />, label: "Location", value: personalInfo.location }
-                ].map((item, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="flex items-center bg-gray-900/80 p-4 rounded-lg hover:bg-gray-900 transition-all duration-300"
-                    variants={fadeInUp}
-                    whileHover={{ y: -5, boxShadow: "0 5px 15px rgba(0,0,0,0.1)" }}
-                  >
-                    <div className="bg-gray-800 p-3 rounded-full mr-4">
-                      {item.icon}
+                  { icon: Mail, label: 'Email', value: personalInfo.email, href: `mailto:${personalInfo.email}` },
+                  { icon: Phone, label: 'Phone', value: personalInfo.phone, href: `tel:${personalInfo.phone.replace(/\s/g, '')}` },
+                  { icon: MapPin, label: 'Location', value: personalInfo.location },
+                ].map(({ icon: Icon, label, value, href }) => (
+                  <li key={label} className="flex items-start gap-4">
+                    <Icon className="text-accent mt-1 shrink-0" size={20} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted">{label}</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        {href
+                          ? <a href={href} className="text-ink font-medium hover:text-accent break-all">{value}</a>
+                          : <span className="text-ink font-medium">{value}</span>}
+                        {href && <CopyButton text={value} label={label} />}
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-400">{item.label}</h4>
-                      {item.href ? (
-                        <a href={item.href} className="text-cyan-400 hover:underline">
-                          {item.value}
-                        </a>
-                      ) : (
-                        <span className="text-gray-300">{item.value}</span>
-                      )}
-                    </div>
-                  </motion.div>
+                  </li>
                 ))}
-              </motion.div>
+              </ul>
             </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-20 bg-black relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Services I Offer" icon={<Briefcase size={24} />} />
-            <motion.div 
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-            >
-              {servicesData.map((service, index) => (
-                <motion.div key={index} variants={fadeInUp}>
-                  <ServiceCard 
-                    icon={service.icon}
-                    title={service.title}
-                    description={service.description}
-                  />
-                </motion.div>
+            <dl className="grid grid-cols-1 sm:grid-cols-3 mt-14 pt-10 border-t border-line gap-y-8">
+              {stats.map((s, i) => (
+                <div key={s.label} className={`px-4 ${i > 0 ? 'sm:border-l sm:border-line' : 'sm:pl-0'}`}>
+                  <dd className="text-4xl font-bold text-ink">{s.value}</dd>
+                  <dt className="text-base text-ink mt-1">{s.label}</dt>
+                  {s.note && <dd className="text-sm font-semibold text-accent mt-0.5">{s.note}</dd>}
+                </div>
               ))}
-            </motion.div>
+            </dl>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Education Section */}
-      <section id="education" className="py-20 bg-gray-900 relative">
+      {/* Experience */}
+      <section id="experience" className="py-20 bg-bg">
         <div className="container mx-auto px-4">
           <AnimatedSection>
-            <SectionTitle title="Education" icon={<GraduationCap size={24} />} />
+            <SectionTitle title="Experience" eyebrow="Career" />
             <div className="space-y-8 relative">
-              {/* Timeline line */}
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-700 hidden md:block"></div>
-              
-              {educationData.map((edu, index) => (
-                <motion.div 
-                  key={index} 
-                  className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300 relative md:ml-12"
-                  initial={{ opacity: 0, x: -50 }}
+              <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-line hidden md:block" />
+              {experienceData.map((exp, i) => (
+                <motion.div
+                  key={exp.company}
+                  className={`${card} p-6 relative md:ml-12`}
+                  initial={{ opacity: 0, x: -40 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                  whileHover={{ x: 10, boxShadow: "0 10px 30px -15px rgba(0, 231, 255, 0.2)" }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  {/* Timeline dot */}
-                  <div className="absolute left-0 top-1/2 transform -translate-x-16 -translate-y-1/2 w-4 h-4 bg-cyan-500 rounded-full hidden md:block"></div>
-                  
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-                    <h3 className="text-xl font-bold text-cyan-400">{edu.degree}</h3>
-                    <span className="text-gray-400 bg-gray-700 px-3 py-1 rounded-full text-sm mt-2 md:mt-0">
-                      {edu.duration}
-                    </span>
-                  </div>
-                  <div className="mb-4">
-                    <div className="flex items-center text-gray-300">
-                      <Book className="mr-2 text-cyan-400" size={16} />
-                      {edu.institution}
-                    </div>
-                    <div className="flex items-center text-gray-300 mt-1">
-                      <MapPin className="mr-2 text-cyan-400" size={16} />
-                      {edu.location}
-                    </div>
-                  </div>
-                  <p className="text-gray-400">{edu.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* Experience Section */}
-      <section id="experience" className="py-20 bg-black relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Experience" icon={<Briefcase size={24} />} />
-            <div className="space-y-8 relative">
-              {/* Timeline line */}
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-700 hidden md:block"></div>
-              
-              {experienceData.map((exp, index) => (
-                <motion.div 
-                  key={index} 
-                  className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300 relative md:ml-12"
-                  initial={{ opacity: 0, x: -50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                  whileHover={{ x: 10, boxShadow: "0 10px 30px -15px rgba(0, 231, 255, 0.2)" }}
-                >
-                  {/* Timeline dot */}
-                  <div className="absolute left-0 top-1/2 transform -translate-x-16 -translate-y-1/2 w-4 h-4 bg-cyan-500 rounded-full hidden md:block"></div>
-                  
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-                    <h3 className="text-xl font-bold text-cyan-400">{exp.title}</h3>
-                    <span className="text-gray-400 bg-gray-700 px-3 py-1 rounded-full text-sm mt-2 md:mt-0">
+                  <div className="absolute top-8 -left-12 w-3.5 h-3.5 bg-line rounded-full hidden md:block ring-4 ring-bg" />
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-1 gap-2">
+                    <h3 className="text-xl font-bold text-ink">{exp.title}</h3>
+                    <span className={`text-sm px-3 py-1 rounded-full w-fit ${exp.current ? 'bg-accent-soft text-ink font-semibold border border-line' : 'bg-surface text-muted border border-line'}`}>
                       {exp.duration}
                     </span>
                   </div>
-                  <div className="mb-4">
-                    <div className="flex items-center text-gray-300">
-                      <Briefcase className="mr-2 text-cyan-400" size={16} />
-                      {exp.company}
-                    </div>
-                  </div>
-                  <p className="text-gray-400">{exp.description}</p>
+                  <p className="text-ink text-lg font-semibold mb-4 flex items-center"><Briefcase className="mr-2 text-accent" size={18} />{exp.company}</p>
+                  <ul className="list-disc pl-5 space-y-1.5 text-muted mb-4">
+                    {exp.points.map((p) => <li key={p}><RichText text={p} /></li>)}
+                  </ul>
+                  <div className="flex flex-wrap gap-2">{exp.tech.map((t) => <span key={t} className={chip}>{t}</span>)}</div>
                 </motion.div>
               ))}
             </div>
@@ -664,322 +229,212 @@ const MainPage = () => {
         </div>
       </section>
 
-      {/* Projects Section */}
-      <section id="projects" className="py-20 bg-gray-900">
+      {/* Projects */}
+      <section id="projects" className="py-20 bg-surface">
         <div className="container mx-auto px-4">
           <AnimatedSection>
-            <SectionTitle title="Projects" icon={<Code size={24} />} />
-            <div className="grid md:grid-cols-2 gap-8">
-              {projectsData.map((project, index) => (
-                <motion.div
-                  key={index}
-                  className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300"
-                  whileHover={{ y: -10, boxShadow: "0 10px 30px -15px rgba(0, 231, 255, 0.2)" }}
-                >
-                  <h3 className="text-xl font-bold text-cyan-400 mb-3">{project.name}</h3>
-                  <p className="text-gray-300 mb-4">{project.description}</p>
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-400 mb-2">Technologies:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {project.technologies.map((tech, i) => (
-                        <span key={i} className="bg-gray-700 text-cyan-300 px-3 py-1 rounded-full text-sm">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap space-x-2 space-y-2 md:space-y-0">
-                    <motion.a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
-                      whileHover={{ x: 3 }}
-                    >
-                      <Github size={18} className="mr-1" /> GitHub
-                    </motion.a>
-                      
-                    {project.documents &&
-                      project.documents.map((doc, docIndex) => (
-                        <motion.a
-                          key={docIndex}
-                          href={doc.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors ml-4 first:ml-0"
-                          whileHover={{ x: 3 }}
-                          download
-                        >
-                          <Download size={18} className="mr-1" /> {doc.name}
-                        </motion.a>
-                      ))}
-                  </div>
-                </motion.div>
+            <SectionTitle title="Projects" eyebrow="Work" />
+            <div className="flex flex-wrap gap-2 mb-8">
+              {FILTERS.map((f) => (
+                <button key={f.id} onClick={() => setFilter(f.id)}
+                  className={`px-4 py-1.5 rounded-md text-sm transition-colors ${filter === f.id ? 'bg-accent text-on-accent font-semibold' : 'bg-surface text-muted border border-line hover:text-accent'}`}>
+                  {f.label}
+                </button>
               ))}
             </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      <section id="skills" className="py-20 bg-black relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Skills" icon={<Code size={24} />} />
-            <div className="grid md:grid-cols-2 gap-8">
-              <motion.div 
-                className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300"
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                <h3 className="text-xl font-bold text-cyan-400 mb-6">Technical Skills</h3>
-                <div className="flex flex-wrap gap-3">
-                  {skillsData.technical.map((skill, index) => (
-                    <motion.span 
-                      key={index} 
-                      className="bg-gray-700 text-cyan-300 px-4 py-2 rounded-lg flex items-center"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      whileHover={{ scale: 1.05, y: -3 }}
-                    >
-                      <CheckCircle size={16} className="mr-2" /> {skill}
-                    </motion.span>
-                  ))}
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300"
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                <h3 className="text-xl font-bold text-cyan-400 mb-6">Interpersonal Skills</h3>
-                <div className="flex flex-wrap gap-3">
-                  {skillsData.interpersonal.map((skill, index) => (
-                    <motion.span 
-                      key={index} 
-                      className="bg-gray-700 text-cyan-300 px-4 py-2 rounded-lg flex items-center"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      whileHover={{ scale: 1.05, y: -3 }}
-                    >
-                      <CheckCircle size={16} className="mr-2" /> {skill}
-                    </motion.span>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* Certifications Section */}
-      <section id="certifications" className="py-20 bg-gray-900 relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Certifications" icon={<Award size={24} />} />
-            <div className="space-y-8">
-              {certificationsData.map((cert, index) => (
-                <motion.div 
-                  key={index} 
-                  className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300"
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                  whileHover={{ x: 10, boxShadow: "0 10px 30px -15px rgba(0, 231, 255, 0.2)" }}
-                >
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-                    <h3 className="text-xl font-bold text-cyan-400">{cert.title}</h3>
-                    <span className="text-gray-400 bg-gray-700 px-3 py-1 rounded-full text-sm mt-2 md:mt-0">
-                      {cert.duration}
-                    </span>
-                  </div>
-                  <div className="mb-4">
-                    <div className="flex items-center text-gray-300">
-                      <Award className="mr-2 text-cyan-400" size={16} />
-                      {cert.organization}
-                    </div>
-                  </div>
-                  <p className="text-gray-400">{cert.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* Achievements Section */}
-      {/* <section id="achievements" className="py-20 bg-black relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Achievements" icon={<Award size={24} />} />
-            <motion.div 
-              className="grid md:grid-cols-2 gap-8"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {achievementsData.map((achievement, index) => (
-                <motion.div 
-                  key={index} 
-                  className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300"
-                  variants={fadeInUp}
-                  whileHover={{ scale: 1.05, boxShadow: "0 10px 30px -15px rgba(0, 231, 255, 0.2)" }}
-                >
-                  <h3 className="text-xl font-bold text-cyan-400 mb-3">{achievement.title}</h3>
-                  <p className="text-gray-300">{achievement.description}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimatedSection>
-        </div>
-      </section> */}
-
-      {/* Contact Section */}
-      <section id="contact" className="py-20 bg-gray-900 relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Contact Me" icon={<Mail size={24} />} />
-            <div className="grid md:grid-cols-2 gap-8">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                <h3 className="text-xl font-bold text-cyan-400 mb-4">Get In Touch</h3>
-                <p className="text-gray-300 mb-6">
-                  Feel free to reach out to me.
-                </p>
-                <div className="space-y-6">
-                  {[
-                    { icon: <Mail className="text-cyan-400" size={20} />, title: "Email", value: personalInfo.email, href: `mailto:${personalInfo.email}` },
-                    { icon: <Phone className="text-cyan-400" size={20} />, title: "Phone", value: personalInfo.phone, href: `tel:${personalInfo.phone}` },
-                    { icon: <MapPin className="text-cyan-400" size={20} />, title: "Location", value: personalInfo.location }
-                  ].map((item, index) => (
-                    <motion.div 
-                      key={index} 
-                      className="flex items-center"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <div className="bg-gray-800 p-3 rounded-full mr-4">
-                        {item.icon}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-400">{item.title}</h4>
-                        {item.href ? (
-                          <a href={item.href} className="text-cyan-400 hover:underline">
-                            {item.value}
-                          </a>
-                        ) : (
-                          <span className="text-gray-300">{item.value}</span>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                <form action="https://formsubmit.co/namraimtiaz04@gmail.com" method="POST" className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-cyan-500 transition-all duration-300">
-                  <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-300 font-medium mb-2">Name</label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
-                      placeholder="Your Name"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="email" className="block text-gray-300 font-medium mb-2">Email</label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
-                      placeholder="Your Email"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="message" className="block text-gray-300 font-medium mb-2">Message</label>
-                    <textarea 
-                      id="message" 
-                      rows={4}
-                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
-                      placeholder="Your Message"
-                    ></textarea>
-                  </div>
-                  <input type="hidden" name="_captcha" value="false" />
-                  <motion.button 
-                    type="submit" 
-                    className="w-full bg-cyan-500 text-black py-3 rounded-lg hover:bg-cyan-600 transition-colors font-bold"
-                    whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(6, 182, 212, 0.5)" }}
-                    whileTap={{ scale: 0.98 }}
+            <div className="grid md:grid-cols-2 gap-6">
+              <AnimatePresence mode="popLayout">
+                {visibleProjects.map((p) => (
+                  <motion.div
+                    layout
+                    key={p.name}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className={`${card} p-6 flex flex-col ${p.featured ? 'md:col-span-2' : ''}`}
                   >
-                    Send Message
-                  </motion.button>
-                </form>
-              </motion.div>
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <h3 className="text-xl font-bold text-ink">{p.name}</h3>
+                      {p.status
+                        ? <span className="text-xs bg-accent-soft text-accent border border-accent/40 px-2 py-1 rounded-md whitespace-nowrap font-semibold">{p.status}</span>
+                        : p.featured && <span className="text-xs bg-accent-soft text-muted border border-line px-2 py-1 rounded-md whitespace-nowrap">Featured</span>}
+                    </div>
+                    <p className="text-muted mb-4 flex-1"><RichText text={p.description} /></p>
+                    <div className="flex flex-wrap gap-2 mb-4">{p.technologies.map((t) => <span key={t} className={chip}>{t}</span>)}</div>
+                    {p.links.length > 0 && (
+                      <div className="flex flex-wrap gap-x-5 gap-y-2 pt-4 border-t border-line">
+                        {p.links.map((l) => {
+                          const Icon = LINK_ICONS[l.type] || ExternalLink;
+                          return (
+                            <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center text-sm text-accent hover:underline transition-colors">
+                              <Icon size={16} className="mr-1.5" /> {l.label}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Footer Section */}
-      <footer className="bg-gray-900 py-8 border-t border-gray-800">
+      {/* Research */}
+      <section id="research" className="py-20 bg-bg">
+        <div className="container mx-auto px-4">
+          <AnimatedSection>
+            <SectionTitle title="Research" eyebrow="Publications" />
+            <div className="grid md:grid-cols-3 gap-6">
+              {researchData.map((r) => (
+                <div key={r.title} className={`${card} p-6 flex flex-col`}>
+                  <h3 className="text-lg font-bold text-ink mb-3">{r.title}</h3>
+                  <p className="text-muted text-sm mb-4 flex-1"><RichText text={r.summary} /></p>
+                  <div className="flex flex-wrap gap-2 mb-4">{r.tags.map((t) => <span key={t} className={chip}>{t}</span>)}</div>
+                  {r.href && (
+                    <a href={r.href} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-accent hover:text-accent">
+                      <ExternalLink size={16} className="mr-1.5" /> {r.linkLabel}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Skills */}
+      <section id="skills" className="py-20 bg-surface">
+        <div className="container mx-auto px-4">
+          <AnimatedSection>
+            <SectionTitle title="Skills" eyebrow="Toolbox" />
+            <div className="divide-y divide-line border-y border-line">
+              {skillsData.map((g) => (
+                <div key={g.group} className="grid md:grid-cols-4 gap-3 md:gap-8 py-5">
+                  <h3 className="text-base font-semibold text-ink">{g.group}</h3>
+                  <div className="md:col-span-3 flex flex-wrap gap-2">
+                    {g.items.map((s) => <span key={s} className={chip}>{s}</span>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Education & Community */}
+      <section id="education" className="py-20 bg-bg">
+        <div className="container mx-auto px-4">
+          <AnimatedSection>
+            <SectionTitle title="Education & Community" eyebrow="Background" />
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                {educationData.map((e) => (
+                  <div key={e.degree} className={`${card} p-6`}>
+                    <div className="flex flex-col md:flex-row md:justify-between gap-2 mb-2">
+                      <h3 className="text-lg font-bold text-ink">{e.degree}</h3>
+                      <span className="text-sm bg-surface text-muted border border-line px-3 py-1 rounded-full w-fit">{e.duration}</span>
+                    </div>
+                    <p className="text-muted">{e.institution}</p>
+                    <p className="text-muted text-sm flex items-center mt-1"><MapPin size={14} className="mr-1" />{e.location}</p>
+                  </div>
+                ))}
+                <div className={`${card} p-6`}>
+                  <h3 className="text-lg font-bold text-ink mb-3 flex items-center"><Award size={18} className="mr-2 text-muted" />Certifications & Competitions</h3>
+                  <ul className="space-y-1 text-muted mb-4">
+                    {certificationsData.map((c) => <li key={c.title}>{c.title} <span className="text-muted">- {c.org}</span></li>)}
+                  </ul>
+                  <div className="flex flex-wrap gap-2">{hackathonsData.map((h) => <span key={h} className={chip}>{h}</span>)}</div>
+                </div>
+              </div>
+              <div className={`${card} p-6`}>
+                <h3 className="text-lg font-bold text-ink mb-4 flex items-center"><Users size={18} className="mr-2 text-muted" />Leadership & Community</h3>
+                <div className="space-y-5">
+                  {leadershipData.map((l) => (
+                    <div key={l.role} className="border-l-2 border-line pl-4">
+                      <p className="font-semibold text-ink">{l.role}</p>
+                      <p className="text-sm text-muted">{l.org}</p>
+                      <p className="text-muted mt-1">{l.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="py-20 bg-surface">
+        <div className="container mx-auto px-4">
+          <AnimatedSection>
+            <SectionTitle title="Contact Me" eyebrow="Contact" />
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-bold text-ink mb-4">Let's work together</h3>
+                <p className="text-muted mb-6">
+                  Open to full-time software engineering roles and interesting projects. Send a message and I'll get back to you.
+                </p>
+                <div className="space-y-5">
+                  {[
+                    { icon: Mail, title: 'Email', value: personalInfo.email, href: `mailto:${personalInfo.email}` },
+                    { icon: Phone, title: 'Phone', value: personalInfo.phone, href: `tel:${personalInfo.phone.replace(/\s/g, '')}` },
+                    { icon: MapPin, title: 'Location', value: personalInfo.location },
+                  ].map(({ icon: Icon, title, value, href }) => (
+                    <div key={title} className="flex items-center">
+                      <div className="bg-accent-soft p-3 rounded-full mr-4"><Icon className="text-ink" size={20} /></div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted">{title}</h4>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          {href ? <a href={href} className="text-accent hover:underline">{value}</a> : <span className="text-muted">{value}</span>}
+                          {href && <CopyButton text={value} label={title} />}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <form action={`https://formsubmit.co/${personalInfo.email}`} method="POST" className={`${card} p-6`}>
+                {[
+                  { id: 'name', label: 'Name', type: 'text' },
+                  { id: 'email', label: 'Email', type: 'email' },
+                ].map((f) => (
+                  <div className="mb-4" key={f.id}>
+                    <label htmlFor={f.id} className="block text-muted font-medium mb-2">{f.label}</label>
+                    <input type={f.type} id={f.id} name={f.id} required placeholder={`Your ${f.label}`}
+                      className="w-full px-4 py-2 bg-bg border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-ink" />
+                  </div>
+                ))}
+                <div className="mb-4">
+                  <label htmlFor="message" className="block text-muted font-medium mb-2">Message</label>
+                  <textarea id="message" name="message" rows={4} required placeholder="Your Message"
+                    className="w-full px-4 py-2 bg-bg border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-ink" />
+                </div>
+                <input type="hidden" name="_captcha" value="false" />
+                <input type="hidden" name="_subject" value="New message from your portfolio" />
+                <button type="submit" className="w-full bg-accent text-on-accent py-3 rounded-lg hover:opacity-90 transition-colors font-bold">
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      <footer className="bg-surface py-8 border-t border-line">
         <div className="container mx-auto px-4 text-center">
-          <motion.p 
-            className="text-gray-400 mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            &copy; 2024 {personalInfo.name}. All Rights Reserved.
-          </motion.p>
-          <motion.div 
-            className="flex justify-center space-x-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            {[
-              { icon: <Linkedin size={24} />, url: personalInfo.linkedin, label: "LinkedIn Profile" },
-              { icon: <Github size={24} />, url: personalInfo.github, label: "GitHub Profile" },
-              { icon: <Mail size={24} />, url: `mailto:${personalInfo.email}`, label: "Email Contact" }
-            ].map((social, index) => (
-              <motion.a 
-                key={index}
-                href={social.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors"
-                aria-label={social.label}
-                whileHover={{ y: -3, scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {social.icon}
-              </motion.a>
+          <p className="text-muted mb-4">&copy; {new Date().getFullYear()} {personalInfo.name}. All Rights Reserved.</p>
+          <div className="flex justify-center space-x-4">
+            {socials.map(({ icon: Icon, url, label }) => (
+              <a key={label} href={url} {...(url.startsWith("mailto:") ? {} : { target: "_blank", rel: "noopener noreferrer" })} aria-label={label}
+                className="text-accent hover:underline transition-colors">
+                <Icon size={24} />
+              </a>
             ))}
-          </motion.div>
+          </div>
         </div>
       </footer>
     </div>
