@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-/* Semantic palette: light by default, follows the OS dark setting */
+/* Semantic palette: light by default. The theme is set via data-theme on <html>
+   (see index.html: saved choice, else the OS setting). */
 :root {
   --bg: #ffffff;
   --surface: #f8fafc;
@@ -10,19 +11,19 @@
   --accent: #0f766e;
   --accent-soft: #f0fdfa;
   --on-accent: #ffffff;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1112;
-    --surface: #161a1c;
-    --ink: #f4f4f5;
-    --muted: #b4b4bc;
-    --line: #2a2e30;
-    --accent: #5eead4;
-    --accent-soft: #14262a;
-    --on-accent: #0f1112;
-  }
+:root[data-theme="dark"] {
+  --bg: #0f1112;
+  --surface: #161a1c;
+  --ink: #f4f4f5;
+  --muted: #b4b4bc;
+  --line: #2a2e30;
+  --accent: #5eead4;
+  --accent-soft: #14262a;
+  --on-accent: #0f1112;
+  color-scheme: dark;
 }
 
 @theme inline {

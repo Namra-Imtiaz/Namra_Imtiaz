@@ -1,21 +1,33 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import {
   Linkedin, Github, Mail, Phone, User, GraduationCap, Code, Briefcase, Award, MapPin,
-  ChevronUp, Menu, X, ExternalLink, FlaskConical, Users, Globe, FileText, BookOpen, Database,
+  ChevronUp, Menu, X, ExternalLink, FlaskConical, Globe, FileText, BookOpen, Database,
 } from 'lucide-react';
 import picture from '../assets/me.jpeg';
 import AnimatedSection from '../components/AnimatedSection';
 import SectionTitle from '../components/SectionTitle';
 import CopyButton from '../components/CopyButton';
 import RichText from '../components/RichText';
+import FypSection from '../components/FypSection';
+import CommunitySection from '../components/CommunitySection';
+import ThemeToggle from '../components/ThemeToggle';
+import PhotoGallery from '../components/PhotoGallery';
 import {
   personalInfo, stats, experienceData, educationData, projectsData, researchData,
-  skillsData, leadershipData, certificationsData, hackathonsData,
+  skillsData,
 } from '../data/portfolio';
 
-const NAV = ['home', 'about', 'experience', 'projects', 'research', 'skills', 'education', 'contact'];
+// Navbar entries and the page sections each one covers (used for the active highlight)
+const NAV = [
+  { id: 'home', label: 'Home', sections: ['home'] },
+  { id: 'about', label: 'About', sections: ['about', 'education'] },
+  { id: 'experience', label: 'Experience', sections: ['experience'] },
+  { id: 'projects', label: 'Projects', sections: ['projects', 'fyp', 'research'] },
+  { id: 'skills', label: 'Skills', sections: ['skills'] },
+  { id: 'community', label: 'Leadership', sections: ['community'] },
+  { id: 'contact', label: 'Contact', sections: ['contact'] },
+];
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -34,11 +46,32 @@ const socials = [
 const card = 'bg-bg rounded-xl border border-line hover:shadow-md transition duration-200';
 const chip = 'bg-accent-soft text-muted border border-line px-3 py-1 rounded-md text-xs font-medium';
 
+// Shows the first few bullets of a role and lets the reader expand the rest
+const BulletList = ({ points, limit = 3 }) => {
+  const [open, setOpen] = useState(false);
+  const hidden = points.length - limit;
+  const shown = open || hidden <= 0 ? points : points.slice(0, limit);
+  return (
+    <div className="mb-4">
+      <ul className="list-disc pl-5 space-y-1.5 text-muted">
+        {shown.map((p) => <li key={p}><RichText text={p} /></li>)}
+      </ul>
+      {hidden > 0 && (
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
+          className="mt-2 ml-5 text-sm font-semibold text-accent hover:underline">
+          {open ? 'Show less' : `Show ${hidden} more`}
+        </button>
+      )}
+    </div>
+  );
+};
+
 const MainPage = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [formStatus, setFormStatus] = useState('idle'); // idle | sending | sent | error
   const { scrollYProgress } = useScroll();
   const progressBarWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
@@ -46,12 +79,16 @@ const MainPage = () => {
     const onScroll = () => {
       setShowScrollTop(window.scrollY > 500);
       const probe = window.scrollY + 120;
-      for (const id of NAV) {
-        const el = document.getElementById(id);
-        if (el && probe >= el.offsetTop && probe < el.offsetTop + el.offsetHeight) {
-          setActiveSection(id);
-          break;
-        }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        setActiveSection('contact');
+        return;
+      }
+      for (const item of NAV) {
+        const hit = item.sections.some((id) => {
+          const el = document.getElementById(id);
+          return el && probe >= el.offsetTop && probe < el.offsetTop + el.offsetHeight;
+        });
+        if (hit) { setActiveSection(item.id); break; }
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -63,46 +100,70 @@ const MainPage = () => {
     setMobileMenuOpen(false);
   };
 
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    setFormStatus('sending');
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${personalInfo.email}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      const data = await res.json();
+      if (!res.ok || data.success === 'false' || data.success === false) throw new Error('send failed');
+      form.reset();
+      setFormStatus('sent');
+    } catch {
+      setFormStatus('error');
+    }
+  };
+
   const visibleProjects = projectsData.filter((p) => filter === 'all' || p.category === filter);
 
   const navLinks = (extra = '') =>
-    NAV.map((id) => (
+    NAV.map(({ id, label }) => (
       <a
         key={id}
         href={`#${id}`}
         onClick={(e) => { e.preventDefault(); scrollToSection(id); }}
-        className={`${activeSection === id ? 'text-accent' : 'text-muted'} hover:underline transition-colors capitalize ${extra}`}
+        aria-current={activeSection === id ? 'true' : undefined}
+        className={`${activeSection === id ? 'text-accent font-semibold' : 'text-muted'} hover:text-ink transition-colors ${extra}`}
       >
-        {id}
+        {label}
       </a>
     ));
 
   return (
     <div className="bg-bg text-ink min-h-screen font-sans">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:bg-accent focus:text-on-accent focus:px-4 focus:py-2 focus:rounded-lg">Skip to content</a>
       <motion.div className="fixed top-0 left-0 h-0.5 bg-accent z-50" style={{ width: progressBarWidth }} />
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-bg/90 backdrop-blur border-b border-line">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-ink">N.I</Link>
-          <div className="hidden md:flex space-x-6 text-sm">{navLinks()}</div>
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8 py-4 flex justify-between items-center">
+          <a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} className="text-2xl font-bold text-ink">N.I</a>
+          <div className="hidden lg:flex items-center space-x-6 text-sm">{navLinks()}<ThemeToggle /></div>
+          <div className="lg:hidden flex items-center gap-3">
+          <ThemeToggle />
           <button
-            className="md:hidden text-muted"
+            className="text-muted"
             onClick={() => setMobileMenuOpen((o) => !o)}
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
+          </div>
         </div>
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              className="md:hidden bg-bg border-b border-line overflow-hidden"
+              className="lg:hidden bg-bg border-b border-line overflow-hidden"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
             >
-              <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">{navLinks('py-1')}</div>
+              <div className="mx-auto w-full max-w-6xl px-6 sm:px-8 py-4 flex flex-col space-y-4">{navLinks('py-1')}</div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -123,8 +184,9 @@ const MainPage = () => {
         )}
       </AnimatePresence>
 
+      <main id="main" className="[&>section]:py-20 [&>section:nth-of-type(odd)]:bg-bg [&>section:nth-of-type(even)]:bg-surface">
       {/* Home */}
-      <section id="home" className="min-h-[90vh] flex items-center justify-center pt-16 bg-bg relative">
+      <section id="home" className="min-h-[90vh] flex items-center justify-center !pt-32 relative">
         <AnimatedSection className="text-center px-4 z-10 max-w-3xl">
           <div className="relative inline-block mb-6">
             <img src={picture} alt="Namra Imtiaz" className="mx-auto rounded-full w-44 h-44 object-cover ring-4 ring-accent-soft" />
@@ -145,6 +207,10 @@ const MainPage = () => {
           </div>
 
           <div className="flex justify-center gap-4 flex-wrap">
+            <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}
+              className="inline-flex items-center bg-accent text-on-accent px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-colors">
+              <Mail size={18} className="mr-2" /> Get in touch
+            </a>
             <a href="#projects" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}
               className="inline-flex items-center border border-line text-ink px-6 py-3 rounded-lg font-semibold hover:bg-accent-soft transition-colors">
               View Projects
@@ -154,8 +220,8 @@ const MainPage = () => {
       </section>
 
       {/* About */}
-      <section id="about" className="py-20 bg-surface border-y border-line">
-        <div className="container mx-auto px-4">
+      <section id="about" className="border-y border-line">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
           <AnimatedSection>
             <SectionTitle title="About Me" eyebrow="About" />
             <div className="grid lg:grid-cols-5 gap-12">
@@ -194,9 +260,30 @@ const MainPage = () => {
         </div>
       </section>
 
+      {/* Education & Community */}
+      <section id="education" className="">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
+          <AnimatedSection>
+            <SectionTitle title="Education" eyebrow="Background" />
+            <div className="grid md:grid-cols-2 gap-6">
+              {educationData.map((e) => (
+                <div key={e.degree} className={`${card} p-6`}>
+                  <div className="flex flex-col md:flex-row md:justify-between gap-2 mb-2">
+                    <h3 className="text-lg font-bold text-ink">{e.degree}</h3>
+                    <span className="text-sm bg-surface text-muted border border-line px-3 py-1 rounded-full w-fit">{e.duration}</span>
+                  </div>
+                  <p className="text-muted">{e.institution}</p>
+                  <p className="text-muted text-sm flex items-center mt-1"><MapPin size={14} className="mr-1" />{e.location}</p>
+                </div>
+              ))}
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
       {/* Experience */}
-      <section id="experience" className="py-20 bg-bg">
-        <div className="container mx-auto px-4">
+      <section id="experience" className="">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
           <AnimatedSection>
             <SectionTitle title="Experience" eyebrow="Career" />
             <div className="space-y-8 relative">
@@ -218,10 +305,9 @@ const MainPage = () => {
                     </span>
                   </div>
                   <p className="text-ink text-lg font-semibold mb-4 flex items-center"><Briefcase className="mr-2 text-accent" size={18} />{exp.company}</p>
-                  <ul className="list-disc pl-5 space-y-1.5 text-muted mb-4">
-                    {exp.points.map((p) => <li key={p}><RichText text={p} /></li>)}
-                  </ul>
+                  <BulletList points={exp.points} />
                   <div className="flex flex-wrap gap-2">{exp.tech.map((t) => <span key={t} className={chip}>{t}</span>)}</div>
+                  {exp.photos && <PhotoGallery photos={exp.photos} className={`mt-5 ${exp.photos.length === 1 ? 'max-w-xs' : ''}`} />}
                 </motion.div>
               ))}
             </div>
@@ -230,8 +316,8 @@ const MainPage = () => {
       </section>
 
       {/* Projects */}
-      <section id="projects" className="py-20 bg-surface">
-        <div className="container mx-auto px-4">
+      <section id="projects" className="">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
           <AnimatedSection>
             <SectionTitle title="Projects" eyebrow="Work" />
             <div className="flex flex-wrap gap-2 mb-8">
@@ -282,9 +368,11 @@ const MainPage = () => {
         </div>
       </section>
 
+      <FypSection />
+
       {/* Research */}
-      <section id="research" className="py-20 bg-bg">
-        <div className="container mx-auto px-4">
+      <section id="research" className="">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
           <AnimatedSection>
             <SectionTitle title="Research" eyebrow="Publications" />
             <div className="grid md:grid-cols-3 gap-6">
@@ -306,8 +394,8 @@ const MainPage = () => {
       </section>
 
       {/* Skills */}
-      <section id="skills" className="py-20 bg-surface">
-        <div className="container mx-auto px-4">
+      <section id="skills" className="">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
           <AnimatedSection>
             <SectionTitle title="Skills" eyebrow="Toolbox" />
             <div className="divide-y divide-line border-y border-line">
@@ -324,51 +412,11 @@ const MainPage = () => {
         </div>
       </section>
 
-      {/* Education & Community */}
-      <section id="education" className="py-20 bg-bg">
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <SectionTitle title="Education & Community" eyebrow="Background" />
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                {educationData.map((e) => (
-                  <div key={e.degree} className={`${card} p-6`}>
-                    <div className="flex flex-col md:flex-row md:justify-between gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-ink">{e.degree}</h3>
-                      <span className="text-sm bg-surface text-muted border border-line px-3 py-1 rounded-full w-fit">{e.duration}</span>
-                    </div>
-                    <p className="text-muted">{e.institution}</p>
-                    <p className="text-muted text-sm flex items-center mt-1"><MapPin size={14} className="mr-1" />{e.location}</p>
-                  </div>
-                ))}
-                <div className={`${card} p-6`}>
-                  <h3 className="text-lg font-bold text-ink mb-3 flex items-center"><Award size={18} className="mr-2 text-muted" />Certifications & Competitions</h3>
-                  <ul className="space-y-1 text-muted mb-4">
-                    {certificationsData.map((c) => <li key={c.title}>{c.title} <span className="text-muted">- {c.org}</span></li>)}
-                  </ul>
-                  <div className="flex flex-wrap gap-2">{hackathonsData.map((h) => <span key={h} className={chip}>{h}</span>)}</div>
-                </div>
-              </div>
-              <div className={`${card} p-6`}>
-                <h3 className="text-lg font-bold text-ink mb-4 flex items-center"><Users size={18} className="mr-2 text-muted" />Leadership & Community</h3>
-                <div className="space-y-5">
-                  {leadershipData.map((l) => (
-                    <div key={l.role} className="border-l-2 border-line pl-4">
-                      <p className="font-semibold text-ink">{l.role}</p>
-                      <p className="text-sm text-muted">{l.org}</p>
-                      <p className="text-muted mt-1">{l.detail}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
+      <CommunitySection />
 
       {/* Contact */}
-      <section id="contact" className="py-20 bg-surface">
-        <div className="container mx-auto px-4">
+      <section id="contact" className="">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8">
           <AnimatedSection>
             <SectionTitle title="Contact Me" eyebrow="Contact" />
             <div className="grid md:grid-cols-2 gap-8">
@@ -397,7 +445,7 @@ const MainPage = () => {
                 </div>
               </div>
 
-              <form action={`https://formsubmit.co/${personalInfo.email}`} method="POST" className={`${card} p-6`}>
+              <form onSubmit={sendMessage} className={`${card} p-6`}>
                 {[
                   { id: 'name', label: 'Name', type: 'text' },
                   { id: 'email', label: 'Email', type: 'email' },
@@ -413,19 +461,27 @@ const MainPage = () => {
                   <textarea id="message" name="message" rows={4} required placeholder="Your Message"
                     className="w-full px-4 py-2 bg-bg border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-ink" />
                 </div>
+                <input type="text" name="_honey" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
                 <input type="hidden" name="_captcha" value="false" />
                 <input type="hidden" name="_subject" value="New message from your portfolio" />
-                <button type="submit" className="w-full bg-accent text-on-accent py-3 rounded-lg hover:opacity-90 transition-colors font-bold">
-                  Send Message
+                <button type="submit" disabled={formStatus === 'sending'}
+                  className="w-full bg-accent text-on-accent py-3 rounded-lg hover:opacity-90 transition-colors font-bold disabled:opacity-60">
+                  {formStatus === 'sending' ? 'Sending...' : 'Send Message'}
                 </button>
+                <p role="status" aria-live="polite" className={`mt-3 text-sm ${formStatus === 'error' ? 'text-red-500' : 'text-accent'}`}>
+                  {formStatus === 'sent' && 'Thanks! Your message has been sent.'}
+                  {formStatus === 'error' && `Couldn't send the message. Please email me directly at ${personalInfo.email}.`}
+                </p>
               </form>
             </div>
           </AnimatedSection>
         </div>
       </section>
 
+      </main>
+
       <footer className="bg-surface py-8 border-t border-line">
-        <div className="container mx-auto px-4 text-center">
+        <div className="mx-auto w-full max-w-6xl px-6 sm:px-8 text-center">
           <p className="text-muted mb-4">&copy; {new Date().getFullYear()} {personalInfo.name}. All Rights Reserved.</p>
           <div className="flex justify-center space-x-4">
             {socials.map(({ icon: Icon, url, label }) => (

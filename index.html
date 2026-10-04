@@ -2,11 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var t;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+        if (t === 'dark') document.documentElement.classList.add('dark');
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Namra Imtiaz | Software Engineer</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Namra Imtiaz | Software Engineer" />
+    <meta property="og:description" content="Full-stack software engineer building multi-tenant SaaS, cloud-backed products and AI-powered systems." />
+    <meta property="og:image" content="https://namra-imtiaz.vercel.app/og.png" />
+    <meta property="og:url" content="https://namra-imtiaz.vercel.app/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0f766e" />
     <meta name="description" content="Portfolio of Namra Imtiaz, a full-stack software engineer building multi-tenant SaaS, cloud-backed products and AI systems." />
   </head>
   <body>
